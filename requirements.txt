@@ -1,0 +1,4 @@
+basecolors
+redis
+setuptools~=47.3.1
+psutil~=5.7.0

@@ -1,0 +1,3 @@
+[console_scripts]
+netrec = NetRecorder.NetTraRec:record_starter
+

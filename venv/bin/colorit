@@ -1,0 +1,8 @@
+#!/home/ga/Guardian/For-Longqi/net_traffic_recorder/venv/bin/python
+# -*- coding: utf-8 -*-
+import re
+import sys
+from BaseColor.base_colors import color_it
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
+    sys.exit(color_it())

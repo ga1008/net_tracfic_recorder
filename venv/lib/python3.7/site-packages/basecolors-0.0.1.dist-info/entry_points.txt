@@ -1,0 +1,3 @@
+[console_scripts]
+colorit = BaseColor.base_colors:color_it
+
