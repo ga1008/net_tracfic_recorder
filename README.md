@@ -4,10 +4,10 @@
 ### 安装： 
 
 ```shell script
-$ pip install netrec
+$ pip install NetTraRec
 ```
 
-### 终端使用：
+### 终端使用：  
 
 ```shell script
 $ netrec [-选项]
