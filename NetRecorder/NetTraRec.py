@@ -18,7 +18,7 @@ except ImportError:
     it_res = os.popen("pip install psutil && pip install basecolors").read()
     if "Successfully" in it_res:
         import psutil
-        from BaseColor.base_colors import hgreen, hblue
+        from BaseColor.base_colors import hgreen, hblue, red, hred
 
         print("packages is installed!")
     else:
@@ -123,7 +123,6 @@ def start(ip_keys, print_out=True, unit="auto", push_redis=False, target_redis_p
 def record_starter():
     dp = '    这是一个查看或者返回服务器流量信息的工具。\n' \
          '    https://github.com/ga1008/net_tracfic_recorder'
-    # da = "--->      "
     da = ""
     parser = ArgumentParser(description=dp, formatter_class=RawTextHelpFormatter, add_help=True)
     parser.add_argument("-n", "--net_devices", type=str, dest="net_devices", default='eth0,enp2s0',
@@ -136,7 +135,7 @@ def record_starter():
                         help=f'{da}关键参数提供方式，input/local/now，\n'
                              f'input是随后输入，\n'
                              f'local是在本地redis的"NetRec_key_params"内寻找，\n'
-                             'now是后面直接跟上<**--**>参数字典，例如：now<**-**>{a: 123, b: [4, 5]}，'
+                             'now是后面直接跟上>>>>参数字典，例如：now>>>>{"host": "127.0.0.1", "port": ..., "db": ...}，'
                              'now方式仅限测试\n'
                              f'默认input\n')
     args = parser.parse_args()
@@ -148,13 +147,14 @@ def record_starter():
     push_to_redis = True if push_to_redis == 'y' or push_to_redis is None else False
     key_params = {}
     if push_to_redis:
-        if "now<**-**>" in key_params_mode:
-            key_params = key_params_mode.split("<**-**>")[-1]
+        if key_params_mode.startswith("now"):
+            key_params = key_params_mode.split(">>>>")[-1]
             try:
                 key_params = json.loads(key_params)
             except Exception as E:
                 print(f"can not load key params: \n{key_params}\n{E}")
-        elif "input" in key_params_mode:
+                key_params = {}
+        elif key_params_mode.startswith("input"):
             key_params = {
                 "host": input("target redis host(127.0.0.1): ") or "127.0.0.1",
                 "port": int(input("port(6379): ") or 6379),
@@ -162,7 +162,7 @@ def record_starter():
                 "password": input("password(123456): ") or "123456",
                 "insert_key": input("insert_key(NetRecs): ") or "NetRecs",
             }
-        elif "local" in key_params_mode:
+        elif key_params_mode.startswith("local"):
             try:
                 key_params_raw = get_redis_cli(default_redis_params(
                     updates={"password": input("local redis password(empty to set None): ") or None}
@@ -175,6 +175,7 @@ def record_starter():
             except IndexError:
                 print("no values in local redis key: NetRec_key_params")
                 exit(1)
+    print("key_params", key_params)
     # sys.stdout = Logger(os.path.join(os.getcwd(), f"netrecord_{tell_the_datetime(compact_mode=True)}.log"))
     start(n_devices, print_out=True, unit=unit, push_redis=push_to_redis, target_redis_params=key_params)
 

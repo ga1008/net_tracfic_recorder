@@ -1,7 +1,7 @@
 服务器流量监控小工具
 ====
 
-### 安装： 
+### 安装：  
 
 ```shell script
 $ pip install NetTraRec
@@ -25,9 +25,9 @@ $ netrec -pr
 # ...
 
 # 目标 redis 可以是本地或远程
-# redis 信息也可以使用参数 "-kp now<**--**>参数字典" 传入，方便远程调度
+# redis 信息也可以使用参数 "-kp now>>>>参数字典" 传入，方便远程调度
 # 例如：
-$ netrec -pr -kp 'now<**--**>{"host": ..., "port": ..., ...}'
+$ netrec -pr -kp 'now>>>>{"host": ..., "port": ..., ...}'
 ```
 
 ### 代码调用：  
