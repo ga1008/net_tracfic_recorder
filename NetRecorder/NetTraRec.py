@@ -80,7 +80,6 @@ def start(ip_keys, print_out=True, unit="auto", push_redis=False, target_redis_p
     unit = unit.lower()
     if print_out:
         target_redis_params = target_redis_params if target_redis_params else default_redis_params()
-        insert_sep = target_redis_params.get('insert_sep', "<**-**>")
         insert_key = target_redis_params.get('insert_key', "NetRecs")
         if push_redis:
             print(f"will push results into target redis: [ {target_redis_params.get('host')}:{target_redis_params.get('db')}:{insert_key} ]")
@@ -139,7 +138,7 @@ def record_starter():
                              f'local是在本地redis的"NetRec_key_params"内寻找，\n'
                              'now是后面直接跟上<**--**>参数字典，例如：now<**-**>{a: 123, b: [4, 5]}，'
                              'now方式仅限测试\n'
-                             f'默认随后输入\n')
+                             f'默认input\n')
     args = parser.parse_args()
 
     n_devices = [x.strip() for x in args.net_devices.split(",")]
@@ -162,7 +161,6 @@ def record_starter():
                 "db": int(input("db(0): ") or 0),
                 "password": input("password(123456): ") or "123456",
                 "insert_key": input("insert_key(NetRecs): ") or "NetRecs",
-                "insert_sep": input("insert_sep(<**-**>): ") or "<**-**>",
             }
         elif "local" in key_params_mode:
             try:
