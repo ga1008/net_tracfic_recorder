@@ -12,7 +12,7 @@ def tell_the_datetime(time_stamp=None, compact_mode=False):
     return tm
 
 
-def convert_bytes(bts, lst=None):
+def convert_bytes(bts, lst=None, refresh_rate="s"):
     if lst is None:
         lst = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB']
     i = int(math.floor(  # 舍弃小数点，取小
@@ -21,7 +21,7 @@ def convert_bytes(bts, lst=None):
 
     if i >= len(lst):
         i = len(lst) - 1
-    return ('%.2f' + " " + f"{lst[i]}/s") % (bts / math.pow(1024, i))
+    return ('%.2f' + f" {lst[i]}/{refresh_rate}") % (bts / math.pow(1024, i))
 
 
 def main():
