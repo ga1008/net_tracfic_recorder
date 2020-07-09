@@ -36,9 +36,9 @@ def find_local_redis_pass():
         rcf_path = Path(rc_path_tmp)
         if rcf_path.is_dir():
             rcf_path = rcf_path / "redis.conf"
-            if rcf_path.exists():
-                rcf = get_file_lines(str(rcf_path.absolute()))
-                rd_pass = [re.findall("^requirepass(.*)", x)[0].strip() for x in rcf if re.findall("^requirepass(.*)", x)][0]
+        if rcf_path.exists():
+            rcf = get_file_lines(str(rcf_path.absolute()))
+            rd_pass = [re.findall("^requirepass(.*)", x)[0].strip() for x in rcf if re.findall("^requirepass(.*)", x)][0]
     return rd_pass
 
 
@@ -63,15 +63,14 @@ def start_up_check():
         print(blue("1. push target redis info to local redis(replace the XXX to your info): "))
         print("   $", hcyan("redis-cli"))
         print("   127.0.0.1:6379>", hcyan('AUTH xxxxx'))
-        print("   127.0.0.1:6379>", hcyan("""rpush NetRec_key_params 
-        '{"host": "xxx.xxx.xxx.xxx", "port": 6379, "db": 0, "password": "xxxxxx", "insert_key": "xxxxx"}'"""))
+        print("   127.0.0.1:6379>", hcyan("""rpush NetRec_key_params '{"host": "xxx.xxx.xxx.xxx", "port": 6379, "db": 0, "password": "xxxxxx", "insert_key": "xxxxx"}'"""))
 
         print(blue("2. add system service and set to start automatically at system boot: "))
         print("   $", hcyan("chkconfig --add nettrarec"))
         print("   $", hcyan("chkconfig nettrarec on"))
         print("   $", hcyan("systemctl start nettrarec"))
 
-        print(blue("3. Open target Redis to check if the data is correct"))
+        print(blue("3. Open target Redis to check if the data is correct\n"))
 
 
 if __name__ == '__main__':

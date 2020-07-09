@@ -209,7 +209,6 @@ def record_starter():
                     print("no setting found in local redis, please check and restart")
                     exit(1)
                 key_params = json.loads(key_params_raw[0].decode())
-
             except AuthenticationError:
                 print("password not correct! ")
                 exit(1)
