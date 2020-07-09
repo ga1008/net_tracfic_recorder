@@ -52,10 +52,23 @@ def get_file_lines(f_path):
     return f_lines
 
 
+def gen_server_script(local_path):
+    raw_script = os.path.join(local_path, "nettrarec.raw")
+    with open(raw_script, 'r') as rf:
+        rsf = rf.read()
+    server_path = os.popen("whereis netrec-server | awk '{print $2}'").read()
+    n_rsf = re.sub("abcdefg", server_path, rsf)
+    script_path = os.path.join(local_path, "nettrarec")
+    with open(script_path, 'w') as wf:
+        wf.write(n_rsf)
+
+
 def start_up_check():
     if os.path.exists("/etc/init.d/nettrarec"):
         return
-    os.popen(f'sudo cp {os.path.join(os.path.split(os.path.abspath(__file__))[0], "nettrarec")} /etc/init.d/ && sudo chmod +x /etc/init.d/nettrarec').read()
+    local_path = os.path.split(os.path.abspath(__file__))[0]
+    gen_server_script(local_path)
+    os.popen(f'sudo cp {os.path.join(local_path, "nettrarec")} /etc/init.d/ && sudo chmod +x /etc/init.d/nettrarec').read()
     print("It looks like the first run")
     do = input("you want to add the netrec to system service(it will not show again)? [y/n]: ").lower() or 'n'
     if do == 'y':

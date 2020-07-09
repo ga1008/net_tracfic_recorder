@@ -220,15 +220,15 @@ def record_starter():
 
 
 def record_starter_server():
-    dp = '    这是一个查看或者返回服务器流量信息的工具，以服务的方式启动，默认使用推 redis 的方式\n' \
+    dp = '    这是一个查看或者返回服务器流量信息的工具，以服务的方式启动，默认使用推 redis 的方式，单位为 bytes/m\n' \
          '    https://github.com/ga1008/net_tracfic_recorder'
     da = ""
     parser = ArgumentParser(description=dp, formatter_class=RawTextHelpFormatter, add_help=True)
     parser.add_argument("-n", "--net_devices", type=str, dest="net_devices", default='eth0,enp2s0',
                         help=f'{da}指定网络设备，默认 eth0。多个值使用英文逗号 "," 隔开\n')
-    parser.add_argument("-u", "--unit", type=str, dest="unit", default='auto',
-                        help=f'{da}指定流量单位，auto/bytes/kb/mb/gb，默认auto\n')
-    parser.add_argument("-rf", "--refresh_rate", type=str, dest="refresh_rate", default='s',
+    parser.add_argument("-u", "--unit", type=str, dest="unit", default='bytes',
+                        help=f'{da}指定流量单位，auto/bytes/kb/mb/gb，默认bytes\n')
+    parser.add_argument("-rf", "--refresh_rate", type=str, dest="refresh_rate", default='m',
                         help=f'{da}统计频率，h/m/s (时/分/秒)，默认s\n')
     parser.add_argument("-pr", "--push_redis", type=str, dest="push_redis", default='y', nargs='?',
                         help=f'{da}y/n。将结果推入指定的redis，默认n。如果设置了此参数，则接下来需要提供目标redis的信息\n')

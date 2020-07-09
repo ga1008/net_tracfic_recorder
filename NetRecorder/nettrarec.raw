@@ -1,0 +1,40 @@
+#!/bin/sh
+
+#chkconfig: 123456 90 10
+# openerp server for user authentication
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+RUN=abcdefg
+proc=netrec-server
+
+start() {
+    daemon $RUN &
+}
+
+stop() {
+        echo -n $"Stopping $prog: "
+        killproc $RUN
+        RETVAL=$?
+        echo
+        [ $RETVAL = 0 ]
+}
+
+case "$1" in
+start)
+        start
+        ;;
+stop)
+        stop
+        ;;
+restart)
+        stop
+        start
+        ;;
+*)
+
+    echo "Usage: netrec  {stat|stop|restart}"
+    exit 1
+esac
+exit 0
