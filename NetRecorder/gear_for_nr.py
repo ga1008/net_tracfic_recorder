@@ -1,5 +1,10 @@
 import math
+import os
+import re
 import time
+from pathlib import Path
+
+from BaseColor.base_colors import blue, hcyan
 
 
 def tell_the_datetime(time_stamp=None, compact_mode=False):
@@ -24,9 +29,50 @@ def convert_bytes(bts, lst=None, refresh_rate="s"):
     return ('%.2f' + f" {lst[i]}/{refresh_rate}") % (bts / math.pow(1024, i))
 
 
-def main():
-    print(convert_bytes(int(input('Bytes: '))))
+def find_local_redis_pass():
+    rc_path_tmp = os.popen("whereis 'redis.conf'").read().split(' ')[-1].strip()
+    rd_pass = None
+    if rc_path_tmp:
+        rcf_path = Path(rc_path_tmp)
+        if rcf_path.is_dir():
+            rcf_path = rcf_path / "redis.conf"
+            if rcf_path.exists():
+                rcf = get_file_lines(str(rcf_path.absolute()))
+                rd_pass = [re.findall("^requirepass(.*)", x)[0].strip() for x in rcf if re.findall("^requirepass(.*)", x)][0]
+    return rd_pass
+
+
+def get_file_lines(f_path):
+    try:
+        with open(f_path, 'r') as rf:
+            f_lines = rf.readlines()
+    except PermissionError:
+        f_lines = os.popen(f"sudo cat {f_path}").read().split('\n')
+    f_lines = [x.strip() for x in f_lines]
+    return f_lines
+
+
+def start_up_check():
+    if os.path.exists("/etc/init.d/nettrarec"):
+        return
+    os.popen(f'sudo cp {os.path.join(os.path.split(os.path.abspath(__file__))[0], "nettrarec")} /etc/init.d/ && sudo chmod +x /etc/init.d/nettrarec').read()
+    print("It looks like the first run")
+    do = input("you want to add the netrec to system service(it will not show again)? [y/n]: ").lower() or 'n'
+    if do == 'y':
+        print("please run the following steps: ")
+        print(blue("1. push target redis info to local redis(replace the XXX to your info): "))
+        print("   $", hcyan("redis-cli"))
+        print("   127.0.0.1:6379>", hcyan('AUTH xxxxx'))
+        print("   127.0.0.1:6379>", hcyan("""rpush NetRec_key_params 
+        '{"host": "xxx.xxx.xxx.xxx", "port": 6379, "db": 0, "password": "xxxxxx", "insert_key": "xxxxx"}'"""))
+
+        print(blue("2. add system service and set to start automatically at system boot: "))
+        print("   $", hcyan("chkconfig --add nettrarec"))
+        print("   $", hcyan("chkconfig nettrarec on"))
+        print("   $", hcyan("systemctl start nettrarec"))
+
+        print(blue("3. Open target Redis to check if the data is correct"))
 
 
 if __name__ == '__main__':
-    main()
+    print(find_local_redis_pass())

@@ -8,7 +8,7 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 import redis
 from redis import AuthenticationError
 
-from NetRecorder.gear_for_nr import tell_the_datetime, convert_bytes
+from NetRecorder.gear_for_nr import tell_the_datetime, convert_bytes, find_local_redis_pass, start_up_check
 
 try:
     import psutil
@@ -175,7 +175,6 @@ def record_starter():
                              'now方式仅限测试\n'
                              f'默认input\n')
     args = parser.parse_args()
-
     n_devices = [x.strip() for x in args.net_devices.split(",")]
     unit = args.unit
     refresh_rate = args.refresh_rate.lower()
@@ -184,6 +183,7 @@ def record_starter():
     push_to_redis = True if push_to_redis == 'y' or push_to_redis is None else False
     key_params = {}
     if push_to_redis:
+        start_up_check()
         if key_params_mode.startswith("now"):
             key_params = key_params_mode.split(">>>>")[-1]
             try:
@@ -201,9 +201,13 @@ def record_starter():
             }
         elif key_params_mode.startswith("local"):
             try:
+                local_redis_pass = find_local_redis_pass()
                 key_params_raw = get_redis_cli(default_redis_params(
-                    updates={"password": input("local redis password(empty to set None): ") or None}
+                    updates={"password": local_redis_pass}
                 )).lrange("NetRec_key_params", -1, -1)
+                if not key_params_raw:
+                    print("no setting found in local redis, please check and restart")
+                    exit(1)
                 key_params = json.loads(key_params_raw[0].decode())
 
             except AuthenticationError:

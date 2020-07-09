@@ -1,0 +1,2 @@
+include NetRecorder/nettrarec
+prune examples/sample?/build
