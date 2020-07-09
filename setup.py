@@ -5,7 +5,7 @@ using_setuptools = True
 
 setup_args = {
     'name': 'NetTraRec',
-    'version': '0.0.8',
+    'version': '0.0.9',
     'url': 'https://github.com/ga1008/net_tracfic_recorder',
     'description': '服务器流量监控小工具',
     'long_description': open('README.md', encoding="utf-8").read(),
@@ -21,6 +21,7 @@ setup_args = {
     'entry_points': {
         'console_scripts': [
             'netrec = NetRecorder.NetTraRec:record_starter',
+            'netrec-server = NetRecorder.NetTraRec:record_starter_server',
         ]
     },
 

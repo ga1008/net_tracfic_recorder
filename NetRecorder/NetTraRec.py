@@ -167,7 +167,72 @@ def record_starter():
                         help=f'{da}统计频率，h/m/s (时/分/秒)，默认s\n')
     parser.add_argument("-pr", "--push_redis", type=str, dest="push_redis", default='n', nargs='?',
                         help=f'{da}y/n。将结果推入指定的redis，默认n。如果设置了此参数，则接下来需要提供目标redis的信息\n')
-    parser.add_argument("-kp", "--key_params", type=str, dest="key_params", default='by_input',
+    parser.add_argument("-kp", "--key_params", type=str, dest="key_params", default='input',
+                        help=f'{da}关键参数提供方式，input/local/now，\n'
+                             f'input是随后输入，\n'
+                             f'local是在本地redis的"NetRec_key_params"内寻找，\n'
+                             'now是后面直接跟上>>>>参数字典，例如：now>>>>{"host": "127.0.0.1", "port": ..., "db": ...}，'
+                             'now方式仅限测试\n'
+                             f'默认input\n')
+    args = parser.parse_args()
+    n_devices = [x.strip() for x in args.net_devices.split(",")]
+    unit = args.unit
+    refresh_rate = args.refresh_rate.lower()
+    push_to_redis = args.push_redis
+    key_params_mode = args.key_params
+    push_to_redis = True if push_to_redis == 'y' or push_to_redis is None else False
+    key_params = {}
+    if push_to_redis:
+        start_up_check()
+        if key_params_mode.startswith("now"):
+            key_params = key_params_mode.split(">>>>")[-1]
+            try:
+                key_params = json.loads(key_params)
+            except Exception as E:
+                print(f"can not load key params: \n{key_params}\n{E}")
+                key_params = {}
+        elif key_params_mode.startswith("input"):
+            key_params = {
+                "host": input("target redis host(127.0.0.1): ") or "127.0.0.1",
+                "port": int(input("port(6379): ") or 6379),
+                "db": int(input("db(0): ") or 0),
+                "password": input("password(123456): ") or "123456",
+                "insert_key": input("insert_key(NetRecs): ") or "NetRecs",
+            }
+        elif key_params_mode.startswith("local"):
+            try:
+                local_redis_pass = find_local_redis_pass()
+                key_params_raw = get_redis_cli(default_redis_params(
+                    updates={"password": local_redis_pass}
+                )).lrange("NetRec_key_params", -1, -1)
+                if not key_params_raw:
+                    print("no setting found in local redis, please check and restart")
+                    exit(1)
+                key_params = json.loads(key_params_raw[0].decode())
+            except AuthenticationError:
+                print("password not correct! ")
+                exit(1)
+            except IndexError:
+                print("no values in local redis key: NetRec_key_params")
+                exit(1)
+    # sys.stdout = Logger(os.path.join(os.getcwd(), f"netrecord_{tell_the_datetime(compact_mode=True)}.log"))
+    start(n_devices, print_out=True, unit=unit, refresh_rate=refresh_rate, push_redis=push_to_redis, target_redis_params=key_params)
+
+
+def record_starter_server():
+    dp = '    这是一个查看或者返回服务器流量信息的工具，以服务的方式启动，默认使用推 redis 的方式\n' \
+         '    https://github.com/ga1008/net_tracfic_recorder'
+    da = ""
+    parser = ArgumentParser(description=dp, formatter_class=RawTextHelpFormatter, add_help=True)
+    parser.add_argument("-n", "--net_devices", type=str, dest="net_devices", default='eth0,enp2s0',
+                        help=f'{da}指定网络设备，默认 eth0。多个值使用英文逗号 "," 隔开\n')
+    parser.add_argument("-u", "--unit", type=str, dest="unit", default='auto',
+                        help=f'{da}指定流量单位，auto/bytes/kb/mb/gb，默认auto\n')
+    parser.add_argument("-rf", "--refresh_rate", type=str, dest="refresh_rate", default='s',
+                        help=f'{da}统计频率，h/m/s (时/分/秒)，默认s\n')
+    parser.add_argument("-pr", "--push_redis", type=str, dest="push_redis", default='y', nargs='?',
+                        help=f'{da}y/n。将结果推入指定的redis，默认n。如果设置了此参数，则接下来需要提供目标redis的信息\n')
+    parser.add_argument("-kp", "--key_params", type=str, dest="key_params", default='local',
                         help=f'{da}关键参数提供方式，input/local/now，\n'
                              f'input是随后输入，\n'
                              f'local是在本地redis的"NetRec_key_params"内寻找，\n'
