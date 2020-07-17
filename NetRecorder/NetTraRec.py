@@ -7,22 +7,10 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 
 import redis
 from redis import AuthenticationError
+import psutil
+from BaseColor.base_colors import hgreen, hblue, red, hred
 
 from NetRecorder.gear_for_nr import tell_the_datetime, convert_bytes, find_local_redis_pass, start_up_check
-
-try:
-    import psutil
-    from BaseColor.base_colors import hgreen, hblue, red, hred
-except ImportError:
-    print('package not found! trying to install')
-    it_res = os.popen("pip install psutil && pip install basecolors").read()
-    if "Successfully" in it_res:
-        import psutil
-        from BaseColor.base_colors import hgreen, hblue, red, hred
-
-        print("packages is installed!")
-    else:
-        exit()
 
 
 def get_refresh_time(refresh_rate):
@@ -113,10 +101,13 @@ def default_redis_params(updates=None):
 def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=False, target_redis_params=None):
     unit = unit.lower()
     if print_out:
-        target_redis_params = target_redis_params if target_redis_params else default_redis_params()
-        insert_key = target_redis_params.get('insert_key', "NetRecs")
-        if push_redis:
-            print(f"will push results into target redis: [ {target_redis_params.get('host')}:{target_redis_params.get('db')}:{insert_key} ]")
+        target_redis_params = target_redis_params if target_redis_params else [default_redis_params()]
+        if not isinstance(target_redis_params, list):
+            target_redis_params = [target_redis_params]
+        for trp in target_redis_params:
+            insert_key = trp.get('insert_key', "NetRecs")
+            if push_redis:
+                print(f"will push results into target redis: [ {trp.get('host')}:{trp.get('db')}:{insert_key} ]")
         while 1:
             try:
                 key_i, ne_in, ne_out = get_rate(get_key, unit, refresh_rate)
@@ -127,7 +118,8 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
                     exit(1)
                 if push_redis:
                     insert_obj = json.dumps({i_key: {"in": ne_in.get(i_key), "out": ne_out.get(i_key), "time": tell_the_datetime()} for i_key in s_key_set})
-                    get_redis_cli(target_redis_params).rpush(insert_key, insert_obj)
+                    for trp in target_redis_params:
+                        get_redis_cli(trp).rpush(trp.get('insert_key', "NetRecs"), insert_obj)
                 s_out = "; ".join(
                     [f"{hred(ky)}: [ in: {hgreen(ne_in.get(ky))}, out: {hblue(ne_out.get(ky))} ]" for ky in s_key_set])
                 s_out = f"{'-'*42}{tell_the_datetime()} {s_out}"
