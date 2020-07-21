@@ -10,7 +10,8 @@ from redis import AuthenticationError
 import psutil
 from BaseColor.base_colors import hgreen, hblue, red, hred
 
-from NetRecorder.gear_for_nr import tell_the_datetime, convert_bytes, find_local_redis_pass, start_up_check
+from NetRecorder.gear_for_nr import tell_the_datetime, convert_bytes, find_local_redis_pass, start_up_check, \
+    _get_host_name, _get_current_ip
 
 
 def get_refresh_time(refresh_rate):
@@ -117,7 +118,14 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
                     print(red(f"all net devices: {list(key_i)}"))
                     exit(1)
                 if push_redis:
-                    insert_obj = json.dumps({i_key: {"in": ne_in.get(i_key), "out": ne_out.get(i_key), "time": tell_the_datetime()} for i_key in s_key_set})
+                    hostname = _get_host_name()
+                    cip = _get_current_ip()
+                    insert_obj = json.dumps({i_key: {"in": ne_in.get(i_key),
+                                                     "out": ne_out.get(i_key),
+                                                     "time": tell_the_datetime(),
+                                                     "hostname": hostname,
+                                                     "ip": cip,
+                                                     } for i_key in s_key_set})
                     for trp in target_redis_params:
                         get_redis_cli(trp).rpush(trp.get('insert_key', "NetRecs"), insert_obj)
                 s_out = "; ".join(

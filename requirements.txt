@@ -2,5 +2,7 @@ basecolors
 redis~=3.5.3
 setuptools~=47.3.1
 psutil~=5.7.0
-
 numpy~=1.19.0
+scipy~=1.5.1
+argparse~=1.4.0
+requests~=2.24.0

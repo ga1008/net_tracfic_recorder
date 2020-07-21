@@ -1,9 +1,11 @@
 import math
 import os
 import re
+import socket
 import time
 from pathlib import Path
 
+import requests
 from BaseColor.base_colors import blue, hcyan
 
 
@@ -84,6 +86,16 @@ def start_up_check():
         print("   $", hcyan("systemctl start nettrarec"))
 
         print(blue("3. Open target Redis to check if the data is correct\n"))
+
+
+def _get_host_name():
+    return socket.gethostname()
+
+
+def _get_current_ip():
+    res = requests.get("http://ifconfig.me/all.json").json()
+    cip = res.get("ip_addr", '')
+    return cip
 
 
 if __name__ == '__main__':
