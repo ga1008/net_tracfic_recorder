@@ -89,13 +89,21 @@ def start_up_check():
 
 
 def _get_host_name():
-    return socket.gethostname()
+    try:
+        host_name = socket.gethostname()
+    except Exception as E:
+        print(f"Error in getting host name: \n{E}")
+        host_name = ''
+    return host_name
 
 
 def _get_current_ip():
-    res = requests.get("http://ifconfig.me/all.json").json()
-    cip = res.get("ip_addr", '')
-    return cip
+    ip_info = {}
+    try:
+        ip_info = requests.get("http://ipinfo.io").json()
+    except Exception as E:
+        print(f"Error in getting ip info: \n{E}")
+    return ip_info
 
 
 if __name__ == '__main__':

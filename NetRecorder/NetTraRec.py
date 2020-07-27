@@ -119,12 +119,13 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
                     exit(1)
                 if push_redis:
                     hostname = _get_host_name()
-                    cip = _get_current_ip()
+                    ip_info = _get_current_ip()
                     insert_obj = json.dumps({i_key: {"in": ne_in.get(i_key),
                                                      "out": ne_out.get(i_key),
                                                      "time": tell_the_datetime(),
                                                      "hostname": hostname,
-                                                     "ip": cip,
+                                                     "ip": ip_info.get('ip'),
+                                                     "location": f"{ip_info.get('city')} - {ip_info.get('region')}",
                                                      } for i_key in s_key_set})
                     for trp in target_redis_params:
                         get_redis_cli(trp).rpush(trp.get('insert_key', "NetRecs"), insert_obj)
