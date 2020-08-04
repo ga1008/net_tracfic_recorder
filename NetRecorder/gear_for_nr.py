@@ -100,7 +100,7 @@ def _get_host_name():
 def _get_current_ip():
     ip_info = {}
     try:
-        ip_info = requests.get("http://ipinfo.io").json()
+        ip_info = requests.get("http://ipinfo.io", timeout=(10, 20)).json()
     except Exception as E:
         print(f"Error in getting ip info: \n{E}")
     return ip_info

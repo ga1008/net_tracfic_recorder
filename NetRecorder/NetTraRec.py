@@ -125,7 +125,7 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
                                                      "time": tell_the_datetime(),
                                                      "hostname": hostname,
                                                      "ip": ip_info.get('ip'),
-                                                     "location": f"{ip_info.get('city')} - {ip_info.get('region')}",
+                                                     "location": f"{ip_info.get('city')} - {ip_info.get('country')}",
                                                      } for i_key in s_key_set})
                     for trp in target_redis_params:
                         get_redis_cli(trp).rpush(trp.get('insert_key', "NetRecs"), insert_obj)
