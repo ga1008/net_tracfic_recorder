@@ -100,7 +100,22 @@ def _get_host_name():
 def _get_current_ip():
     ip_info = {}
     try:
-        ip_info = requests.get("http://ipinfo.io", timeout=(10, 20)).json()
+        # ip_info = requests.get("http://ipinfo.io", timeout=(10, 20)).json()
+        ip_info = requests.get("http://cip.cc", timeout=(10, 20)).json()
+    except Exception as E:
+        print(f"Error in getting ip info: \n{E}")
+    return ip_info
+
+
+def _get_current_ip2():
+    ip_info = {}
+    try:
+        res = os.popen("curl cip.cc").read()
+        rl = [x.replace('\t', '').strip().split(': ') for x in res.split('\n') if x.strip()]
+        rd = {i[0]: i[1].strip() for i in rl}
+        ip_info['ip'] = rd.get('IP')
+        ip_info['city'] = rd.get("地址", '').replace(' ', '')
+        ip_info['country'] = rd.get('运营商')
     except Exception as E:
         print(f"Error in getting ip info: \n{E}")
     return ip_info

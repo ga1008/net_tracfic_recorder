@@ -11,7 +11,7 @@ import psutil
 from BaseColor.base_colors import hgreen, hblue, red, hred
 
 from NetRecorder.gear_for_nr import tell_the_datetime, convert_bytes, find_local_redis_pass, start_up_check, \
-    _get_host_name, _get_current_ip
+    _get_host_name, _get_current_ip2
 
 
 def get_refresh_time(refresh_rate):
@@ -119,7 +119,7 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
                     exit(1)
                 if push_redis:
                     hostname = _get_host_name()
-                    ip_info = _get_current_ip()
+                    ip_info = _get_current_ip2()
                     insert_obj = json.dumps({i_key: {"in": ne_in.get(i_key),
                                                      "out": ne_out.get(i_key),
                                                      "time": tell_the_datetime(),
@@ -144,6 +144,7 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
                 exit()
             except Exception as E:
                 print(f"not functioning\n{E}")
+                time.sleep(5)
                 continue
     else:
         key_i, ne_in, ne_out = get_rate(get_key, unit, refresh_rate)
@@ -230,7 +231,7 @@ def record_starter_server():
     parser.add_argument("-u", "--unit", type=str, dest="unit", default='bytes',
                         help=f'{da}指定流量单位，auto/bytes/kb/mb/gb，默认bytes\n')
     parser.add_argument("-rf", "--refresh_rate", type=str, dest="refresh_rate", default='m',
-                        help=f'{da}统计频率，h/m/s (时/分/秒)，默认s\n')
+                        help=f'{da}统计频率，h/m/s (时/分/秒)，默认m\n')
     parser.add_argument("-pr", "--push_redis", type=str, dest="push_redis", default='y', nargs='?',
                         help=f'{da}y/n。将结果推入指定的redis，默认n。如果设置了此参数，则接下来需要提供目标redis的信息\n')
     parser.add_argument("-kp", "--key_params", type=str, dest="key_params", default='local',
