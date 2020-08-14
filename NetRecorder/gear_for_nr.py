@@ -40,7 +40,8 @@ def find_local_redis_pass():
             rcf_path = rcf_path / "redis.conf"
         if rcf_path.exists():
             rcf = get_file_lines(str(rcf_path.absolute()))
-            rd_pass = [re.findall("^requirepass(.*)", x)[0].strip() for x in rcf if re.findall("^requirepass(.*)", x)][0]
+            rd_pass = [re.findall("^requirepass(.*)", x)[0].strip() for x in rcf if re.findall("^requirepass(.*)", x)][
+                0]
     return rd_pass
 
 
@@ -70,7 +71,8 @@ def start_up_check():
         return
     local_path = os.path.split(os.path.abspath(__file__))[0]
     gen_server_script(local_path)
-    os.popen(f'sudo cp {os.path.join(local_path, "nettrarec")} /etc/init.d/ && sudo chmod +x /etc/init.d/nettrarec').read()
+    os.popen(
+        f'sudo cp {os.path.join(local_path, "nettrarec")} /etc/init.d/ && sudo chmod +x /etc/init.d/nettrarec').read()
     print("It looks like the first run")
     do = input("you want to add the netrec to system service(it will not show again)? [y/n]: ").lower() or 'n'
     if do == 'y':
@@ -78,7 +80,8 @@ def start_up_check():
         print(blue("1. push target redis info to local redis(replace the XXX to your info): "))
         print("   $", hcyan("redis-cli"))
         print("   127.0.0.1:6379>", hcyan('AUTH xxxxx'))
-        print("   127.0.0.1:6379>", hcyan("""rpush NetRec_key_params '{"host": "xxx.xxx.xxx.xxx", "port": 6379, "db": 0, "password": "xxxxxx", "insert_key": "xxxxx"}'"""))
+        print("   127.0.0.1:6379>", hcyan(
+            """rpush NetRec_key_params '{"host": "xxx.xxx.xxx.xxx", "port": 6379, "db": 0, "password": "xxxxxx", "insert_key": "xxxxx"}'"""))
 
         print(blue("2. add system service and set to start automatically at system boot: "))
         print("   $", hcyan("chkconfig --add nettrarec"))
@@ -107,12 +110,12 @@ def _get_current_ip():
     return ip_info
 
 
-def _get_current_ip2():
-    ip_info = {}
+def _get_current_ip2(last_ip_info):
+    ip_info = last_ip_info
     try:
         res = os.popen("curl cip.cc").read()
         rl = [x.replace('\t', '').strip().split(': ') for x in res.split('\n') if x.strip()]
-        rd = {i[0]: i[1].strip() for i in rl}
+        rd = {i[0]: i[1].strip() for i in rl if len(i) >= 2}
         ip_info['ip'] = rd.get('IP')
         ip_info['city'] = rd.get("地址", '').replace(' ', '')
         ip_info['country'] = rd.get('运营商')

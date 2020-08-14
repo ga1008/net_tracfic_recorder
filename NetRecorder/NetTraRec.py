@@ -109,6 +109,7 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
             insert_key = trp.get('insert_key', "NetRecs")
             if push_redis:
                 print(f"will push results into target redis: [ {trp.get('host')}:{trp.get('db')}:{insert_key} ]")
+        ip_info = {}
         while 1:
             try:
                 key_i, ne_in, ne_out = get_rate(get_key, unit, refresh_rate)
@@ -119,7 +120,7 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
                     exit(1)
                 if push_redis:
                     hostname = _get_host_name()
-                    ip_info = _get_current_ip2()
+                    ip_info = _get_current_ip2(ip_info)
                     insert_obj = json.dumps({i_key: {"in": ne_in.get(i_key),
                                                      "out": ne_out.get(i_key),
                                                      "time": tell_the_datetime(),
