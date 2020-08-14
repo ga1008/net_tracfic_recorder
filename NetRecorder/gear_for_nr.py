@@ -1,3 +1,4 @@
+import json
 import math
 import os
 import re
@@ -103,8 +104,7 @@ def _get_host_name():
 def _get_current_ip():
     ip_info = {}
     try:
-        # ip_info = requests.get("http://ipinfo.io", timeout=(10, 20)).json()
-        ip_info = requests.get("http://cip.cc", timeout=(10, 20)).json()
+        ip_info = requests.get("http://ipinfo.io", timeout=(10, 20)).json()
     except Exception as E:
         print(f"Error in getting ip info: \n{E}")
     return ip_info
@@ -119,6 +119,18 @@ def _get_current_ip2(last_ip_info):
         ip_info['ip'] = rd.get('IP')
         ip_info['city'] = rd.get("地址", '').replace(' ', '')
         ip_info['country'] = rd.get('运营商')
+    except Exception as E:
+        print(f"Error in getting ip info: \n{E}")
+    return ip_info
+
+
+def _get_current_ip3(last_ip_info):
+    ip_info = last_ip_info
+    try:
+        res = json.loads(os.popen("curl http://ip-api.com/json/?lang=zh-CN").read())
+        ip_info['ip'] = res.get('query')
+        ip_info['city'] = '.'.join([res.get("country", ''), res.get("regionName", ''), res.get("city", '')])
+        ip_info['country'] = res.get('isp', '').split('.')[0]
     except Exception as E:
         print(f"Error in getting ip info: \n{E}")
     return ip_info

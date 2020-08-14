@@ -11,7 +11,7 @@ import psutil
 from BaseColor.base_colors import hgreen, hblue, red, hred
 
 from NetRecorder.gear_for_nr import tell_the_datetime, convert_bytes, find_local_redis_pass, start_up_check, \
-    _get_host_name, _get_current_ip2
+    _get_host_name, _get_current_ip3
 
 
 def get_refresh_time(refresh_rate):
@@ -120,7 +120,7 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
                     exit(1)
                 if push_redis:
                     hostname = _get_host_name()
-                    ip_info = _get_current_ip2(ip_info)
+                    ip_info = _get_current_ip3(ip_info)
                     insert_obj = json.dumps({i_key: {"in": ne_in.get(i_key),
                                                      "out": ne_out.get(i_key),
                                                      "time": tell_the_datetime(),
