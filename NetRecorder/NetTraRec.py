@@ -5,13 +5,12 @@ import sys
 import time
 from argparse import ArgumentParser, RawTextHelpFormatter
 
-import redis
-from redis import AuthenticationError
 import psutil
 from BaseColor.base_colors import hgreen, hblue, red, hred
+from redis import AuthenticationError
 
 from NetRecorder.gear_for_nr import tell_the_datetime, convert_bytes, find_local_redis_pass, start_up_check, \
-    _get_host_name, _get_current_ip3
+    _get_host_name, _get_current_ip3, get_redis_cli, default_redis_params, get_redis_list_last
 
 
 def get_refresh_time(refresh_rate):
@@ -79,26 +78,6 @@ def get_rate(func, unit="auto", refresh_rate="s"):
     return k_info, n_in, n_out
 
 
-def get_redis_cli(redis_params):
-    return redis.Redis(
-        host=redis_params.get("host", "127.0.0.1"),
-        port=redis_params.get("port", 6379),
-        db=redis_params.get("db", 0),
-        password=redis_params.get("password", "123456"),
-    )
-
-
-def default_redis_params(updates=None):
-    def_para = {
-        "host": "127.0.0.1",
-        "port": 6379,
-        "db": 0,
-        "password": "123456",
-    }
-    def_para.update(updates if updates and isinstance(updates, dict) else {})
-    return def_para
-
-
 def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=False, target_redis_params=None):
     unit = unit.lower()
     if print_out:
@@ -121,12 +100,13 @@ def start(ip_keys, print_out=True, unit="auto", refresh_rate="s", push_redis=Fal
                 if push_redis:
                     hostname = _get_host_name()
                     ip_info = _get_current_ip3(ip_info)
+                    location_info = json.loads(get_redis_list_last("NetRecLocation")) or {}
                     insert_obj = json.dumps({i_key: {"in": ne_in.get(i_key),
                                                      "out": ne_out.get(i_key),
                                                      "time": tell_the_datetime(),
                                                      "hostname": hostname,
                                                      "ip": ip_info.get('ip'),
-                                                     "location": f"{ip_info.get('city')} - {ip_info.get('country')}",
+                                                     "location": location_info.get('location') or f"{ip_info.get('city')} - {ip_info.get('country')}",
                                                      } for i_key in s_key_set})
                     for trp in target_redis_params:
                         get_redis_cli(trp).rpush(trp.get('insert_key', "NetRecs"), insert_obj)
@@ -204,14 +184,10 @@ def record_starter():
             }
         elif key_params_mode.startswith("local"):
             try:
-                local_redis_pass = find_local_redis_pass()
-                key_params_raw = get_redis_cli(default_redis_params(
-                    updates={"password": local_redis_pass}
-                )).lrange("NetRec_key_params", -1, -1)
-                if not key_params_raw:
+                key_params = json.loads(get_redis_list_last("NetRec_key_params"))
+                if not key_params:
                     print("no setting found in local redis, please check and restart")
                     exit(1)
-                key_params = json.loads(key_params_raw[0].decode())
             except AuthenticationError:
                 print("password not correct! ")
                 exit(1)
@@ -269,14 +245,10 @@ def record_starter_server():
             }
         elif key_params_mode.startswith("local"):
             try:
-                local_redis_pass = find_local_redis_pass()
-                key_params_raw = get_redis_cli(default_redis_params(
-                    updates={"password": local_redis_pass}
-                )).lrange("NetRec_key_params", -1, -1)
-                if not key_params_raw:
+                key_params = json.loads(get_redis_list_last("NetRec_key_params"))
+                if not key_params:
                     print("no setting found in local redis, please check and restart")
                     exit(1)
-                key_params = json.loads(key_params_raw[0].decode())
             except AuthenticationError:
                 print("password not correct! ")
                 exit(1)

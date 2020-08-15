@@ -6,6 +6,7 @@ import socket
 import time
 from pathlib import Path
 
+import redis
 import requests
 from BaseColor.base_colors import blue, hcyan
 
@@ -44,6 +45,37 @@ def find_local_redis_pass():
             rd_pass = [re.findall("^requirepass(.*)", x)[0].strip() for x in rcf if re.findall("^requirepass(.*)", x)][
                 0]
     return rd_pass
+
+
+def get_redis_list_last(key, count=1):
+    local_redis_pass = find_local_redis_pass()
+    key_params_raw = get_redis_cli(default_redis_params(
+        updates={"password": local_redis_pass}
+    )).lrange(key, -count, -1)
+    if not key_params_raw:
+        return None
+    key_params = [x.decode() for x in key_params_raw]
+    return key_params[0] if count == 1 else key_params
+
+
+def get_redis_cli(redis_params):
+    return redis.Redis(
+        host=redis_params.get("host", "127.0.0.1"),
+        port=redis_params.get("port", 6379),
+        db=redis_params.get("db", 0),
+        password=redis_params.get("password", "123456"),
+    )
+
+
+def default_redis_params(updates=None):
+    def_para = {
+        "host": "127.0.0.1",
+        "port": 6379,
+        "db": 0,
+        "password": "123456",
+    }
+    def_para.update(updates if updates and isinstance(updates, dict) else {})
+    return def_para
 
 
 def get_file_lines(f_path):
