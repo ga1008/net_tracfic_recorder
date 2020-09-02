@@ -17,7 +17,7 @@ def tell_the_datetime(time_stamp=None, compact_mode=False):
         format_str = '%Y-%m-%d %H:%M:%S'
     else:
         format_str = '%Y-%m-%d-%H-%M-%S'
-    tm = time.strftime(format_str, time.localtime(time_stamp))
+    tm = time.strftime(format_str, time.gmtime(time_stamp + (8*3600)))
     return tm
 
 
